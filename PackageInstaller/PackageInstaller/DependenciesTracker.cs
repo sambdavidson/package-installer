@@ -6,8 +6,8 @@ namespace PackageInstaller
 {
     public class DependenciesTracker
     {
-        private readonly Dictionary<String, HashSet<String>> m_dependencies;
-        private readonly Dictionary<String, HashSet<String>> m_dependees; 
+        private readonly Dictionary<String, HashSet<String>> m_dependencies; // Contains a map of package to dependent.
+        private readonly Dictionary<String, HashSet<String>> m_dependees;  // Contains a map of package to dependee.
         public DependenciesTracker(IEnumerable<string> packageDependencies)
         {
             m_dependencies = new Dictionary<String, HashSet<String>>();
@@ -20,7 +20,7 @@ namespace PackageInstaller
 
                 HashSet<String> dependentDependenciesSet;
                 m_dependencies.TryGetValue(dependent, out dependentDependenciesSet); //Check and build dependent set.
-                if (dependentDependenciesSet == null) //Add it to the dictionary if it does not already exist in there.
+                if (dependentDependenciesSet == null) //Add it to the dictionary if it does not already exist.
                 {
                     dependentDependenciesSet = new HashSet<string>();
                     m_dependencies.Add(dependent, dependentDependenciesSet);
@@ -28,17 +28,17 @@ namespace PackageInstaller
 
                 HashSet<String> dependentDependeesSet;
                 m_dependees.TryGetValue(dependent, out dependentDependeesSet); //Check and build dependee set.
-                if (dependentDependeesSet == null) //Add it to the dictionary if it does not already exist in there.
+                if (dependentDependeesSet == null) //Add it to the dictionary if it does not already exist.
                 {
                     dependentDependeesSet = new HashSet<string>();
                     m_dependees.Add(dependent, dependentDependeesSet);
                 }
-                if (parts[1].Trim().Length > 0) // Check if the second dependency exists
+                if (parts[1].Trim().Length > 0) // Check if the dependee exists.
                 {
                     String dependee = parts[1].Trim();
 
                     HashSet<String> tmpList;
-                    m_dependencies.TryGetValue(dependee, out tmpList);
+                    m_dependencies.TryGetValue(dependee, out tmpList); //Modify the dependees dependent map.
                     if (tmpList == null)
                     {
                         tmpList = new HashSet<string> {dependent};
@@ -51,19 +51,20 @@ namespace PackageInstaller
                     dependentDependeesSet.Add(dependee);
                 }
                 
-                CheckCircularDependency(dependent); //Check circular dependency
+                CheckCircularDependency(dependent); //Check circular dependency after each addition.
             }
 
         }
         /// <summary>
         /// Helper method that recursively explores a package's dependents. 
-        /// If the starting package is found as a dependent 
+        /// If the starting package is found as a dependent.
+        /// This function could operate a "HasDependent" if neccessary by placing any dependent in startVal. 
         /// </summary>
         /// <param name="package">The package who's dependent tree to explore.</param>
         /// <param name="startVal">The starting package which upon finding indicates a circular dependency</param>
         private void CheckCircularDependency(String package, String startVal = "")
         {
-            if (startVal == "") //Workaround for the variable parameter startVal
+            if (startVal == "") //Workaround for the variable parameter on startVal.
                 startVal = package;
 
             HashSet<String> directDependents;
