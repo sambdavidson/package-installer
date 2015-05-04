@@ -8,18 +8,36 @@ namespace PackageInstaller
 {
     public class DependenciesTracker
     {
-        private Dictionary<String, HashSet<String>> m_dependencies;
-        public DependenciesTracker(String[] dependencies)
+        private readonly Dictionary<String, HashSet<String>> m_dependencies;
+        private readonly Dictionary<String, HashSet<String>> m_dependees; 
+        public DependenciesTracker(IEnumerable<string> packageDependencies)
         {
             m_dependencies = new Dictionary<String, HashSet<String>>();
 
-            foreach (var line in dependencies)
+            foreach (var line in packageDependencies)
             {
                 var parts = line.Split(':');
                 String dependent = parts[0].Trim();
+
+                HashSet<String> dependentDependenciesSet;
+                m_dependencies.TryGetValue(dependent, out dependentDependenciesSet); //Check and build dependent set.
+                if (dependentDependenciesSet == null) //Add it to the dictionary if it does not already exist in there.
+                {
+                    dependentDependenciesSet = new HashSet<string>();
+                    m_dependencies.Add(dependent, dependentDependenciesSet);
+                }
+
+                HashSet<String> dependentDependeesSet;
+                m_dependencies.TryGetValue(dependent, out dependentDependeesSet); //Check and build dependee set.
+                if (dependentDependeesSet == null) //Add it to the dictionary if it does not already exist in there.
+                {
+                    dependentDependeesSet = new HashSet<string>();
+                    m_dependencies.Add(dependent, dependentDependeesSet);
+                }
                 if (parts[1].Trim().Length > 0) // Check if the second dependency exists
                 {
                     String dependee = parts[1].Trim();
+
                     HashSet<String> tmpList;
                     m_dependencies.TryGetValue(dependee, out tmpList);
                     if (tmpList == null)
@@ -31,13 +49,7 @@ namespace PackageInstaller
                     {
                         tmpList.Add(dependent);
                     }
-                }
-                HashSet<String> dentSet;
-                m_dependencies.TryGetValue(dependent, out dentSet);
-                if (dentSet == null) //Add it to the dictionary if it does not already exist in there.
-                {
-                    dentSet = new HashSet<string> ();
-                    m_dependencies.Add(dependent, dentSet);
+                    dependentDependeesSet.Add(dependee);
                 }
                 
                 CheckCircularDependency(dependent,dependent); //Check circular dependency
@@ -56,14 +68,17 @@ namespace PackageInstaller
                 {
                     if (str == startVal)
                     {
-                       throw new CircularDependenciesException(); 
+                       throw new CircularDependencyException(); 
                     }
                     CheckCircularDependency(str, startVal);
                 }
             }
         }
-
-        public String PrintDependencies()
+        /// <summary>
+        /// Prints the packages in the correct order such that a sub-dependency is never installed before a super-dependency.
+        /// </summary>
+        /// <returns>List of packages</returns>
+        public String PrintPackageDependencies()
         {
             return "";
         }
@@ -71,14 +86,14 @@ namespace PackageInstaller
     /// <summary>
     /// Thrown when the DependenciesTracker detects a circular dependency
     /// </summary>
-    public class CircularDependenciesException : Exception
+    public class CircularDependencyException : Exception
     {
-        public CircularDependenciesException()
+        public CircularDependencyException()
         {
             
         }
 
-        public CircularDependenciesException(String message)
+        public CircularDependencyException(String message)
             : base(message)
         {
             

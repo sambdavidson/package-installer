@@ -20,9 +20,9 @@ namespace DependenciesTester
             try
             {
                 DT = new DependenciesTracker(dependencies);
-                Assert.AreEqual(DT.PrintDependencies(), "KittenService, Ice, Cyberportal, Leetmeme, CamelCaser, Fraudstream");
+                Assert.AreEqual(DT.PrintPackageDependencies(), "KittenService, Ice, Cyberportal, Leetmeme, CamelCaser, Fraudstream");
             }
-            catch (CircularDependenciesException)
+            catch (CircularDependencyException)
             {
                 Assert.Fail("Unexpected CircularDependenciesException occured.");
             }
@@ -40,7 +40,7 @@ namespace DependenciesTester
             {
                 var DT = new DependenciesTracker(dependencies);
             }
-            catch (CircularDependenciesException)
+            catch (CircularDependencyException)
             {
                 Assert.IsTrue(true, "CircularDependenciesException occured when expected.");
                 return;
