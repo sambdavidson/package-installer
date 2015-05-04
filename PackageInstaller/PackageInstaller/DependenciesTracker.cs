@@ -121,6 +121,28 @@ namespace PackageInstaller
             output.Append(package + ", ");
             return output.ToString();
         }
+        /// <summary>
+        /// Outputs a list of all dependees of a package. 
+        /// The PDF does not specify whether the PrintPackageDependencies output must be sorted in any way other than respecting dependenies.
+        /// This method will help check if a package is being printed before one of its dependees.
+        /// </summary>
+        /// <param name="package"></param>
+        /// <returns></returns>
+        public HashSet<String> GetDependees(string package)
+        {
+            var dependeeSet = new HashSet<String>();
+            HashSet<String> tmpDependees;
+            m_dependees.TryGetValue(package, out tmpDependees);
+            if (tmpDependees != null)
+            {
+                foreach (var dependee in tmpDependees)
+                {
+                    dependeeSet.Add(dependee);
+                    dependeeSet.UnionWith(GetDependees(dependee));
+                }
+            }
+            return dependeeSet;
+        }
     }
     /// <summary>
     /// Thrown when the DependenciesTracker detects a circular dependency
