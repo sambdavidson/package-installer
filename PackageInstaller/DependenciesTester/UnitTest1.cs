@@ -34,7 +34,7 @@ namespace DependenciesTester
             string[] dependencies =
             {
                 "KittenService:", "Leetmeme: Cyberportal", "Cyberportal: Ice",
-                "CamelCaser: KittenService", "Fraudstream: Leetmeme", "Ice: "
+                "CamelCaser: KittenService", "Fraudstream:", "Ice: Leetmeme"
             };
             try
             {
@@ -43,6 +43,7 @@ namespace DependenciesTester
             catch (CircularDependenciesException)
             {
                 Assert.IsTrue(true, "CircularDependenciesException occured when expected.");
+                return;
             }
             Assert.Fail();
         }

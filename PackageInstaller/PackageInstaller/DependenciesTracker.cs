@@ -32,6 +32,14 @@ namespace PackageInstaller
                         tmpList.Add(dependent);
                     }
                 }
+                HashSet<String> dentSet;
+                m_dependencies.TryGetValue(dependent, out dentSet);
+                if (dentSet == null) //Add it to the dictionary if it does not already exist in there.
+                {
+                    dentSet = new HashSet<string> ();
+                    m_dependencies.Add(dependent, dentSet);
+                }
+                
                 CheckCircularDependency(dependent,dependent); //Check circular dependency
             }
 
