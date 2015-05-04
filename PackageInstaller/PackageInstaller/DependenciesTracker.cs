@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace PackageInstaller
         public DependenciesTracker(IEnumerable<string> packageDependencies)
         {
             m_dependencies = new Dictionary<String, HashSet<String>>();
+            m_dependees = new Dictionary<String, HashSet<String>>();
 
             foreach (var line in packageDependencies)
             {
@@ -28,11 +30,11 @@ namespace PackageInstaller
                 }
 
                 HashSet<String> dependentDependeesSet;
-                m_dependencies.TryGetValue(dependent, out dependentDependeesSet); //Check and build dependee set.
+                m_dependees.TryGetValue(dependent, out dependentDependeesSet); //Check and build dependee set.
                 if (dependentDependeesSet == null) //Add it to the dictionary if it does not already exist in there.
                 {
                     dependentDependeesSet = new HashSet<string>();
-                    m_dependencies.Add(dependent, dependentDependeesSet);
+                    m_dependees.Add(dependent, dependentDependeesSet);
                 }
                 if (parts[1].Trim().Length > 0) // Check if the second dependency exists
                 {
@@ -80,7 +82,31 @@ namespace PackageInstaller
         /// <returns>List of packages</returns>
         public String PrintPackageDependencies()
         {
-            return "";
+            var output = new StringBuilder();
+            var visited = new HashSet<String>();
+            foreach (var package in m_dependencies.Keys)
+            {
+                output.Append(printDependees(package, visited));
+            }
+            return output.ToString();
+        }
+
+        private String printDependees(String package, HashSet<String> visited)
+        {
+            visited.Add(package);
+
+            var output = new StringBuilder();
+            HashSet<String> dependees;
+            m_dependees.TryGetValue(package, out dependees);
+            if (dependees != null)
+            {
+                foreach (var packName in dependees)
+                {
+                    if(!visited.Contains(packName))
+                        output.Append(", " + printDependees(packName,visited));
+                }
+            }
+            return output.ToString();
         }
     }
     /// <summary>

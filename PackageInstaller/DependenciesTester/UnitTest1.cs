@@ -20,7 +20,8 @@ namespace DependenciesTester
             try
             {
                 DT = new DependenciesTracker(dependencies);
-                Assert.AreEqual(DT.PrintPackageDependencies(), "KittenService, Ice, Cyberportal, Leetmeme, CamelCaser, Fraudstream");
+                String packageDependencies = DT.PrintPackageDependencies();
+                Assert.AreEqual("KittenService, Ice, Cyberportal, Leetmeme, CamelCaser, Fraudstream", packageDependencies);
             }
             catch (CircularDependencyException)
             {
