@@ -18,4 +18,20 @@ namespace PackageInstaller
             return "";
         }
     }
+    /// <summary>
+    /// Thrown when the DependenciesTracker detects a circular dependency
+    /// </summary>
+    public class CircularDependenciesException : Exception
+    {
+        public CircularDependenciesException()
+        {
+            
+        }
+
+        public CircularDependenciesException(String message)
+            : base(message)
+        {
+            
+        }
+    }
 }
