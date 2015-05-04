@@ -44,6 +44,7 @@ namespace DependenciesTester
             {
                 Assert.IsTrue(true, "CircularDependenciesException occured when expected.");
             }
+            Assert.Fail();
         }
     }
 }
