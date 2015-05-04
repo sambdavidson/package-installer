@@ -86,16 +86,24 @@ namespace PackageInstaller
             var visited = new HashSet<String>();
             foreach (var package in m_dependencies.Keys)
             {
-                output.Append(printDependees(package, visited));
+                if(!visited.Contains(package))
+                    output.Append(printDependees(package, visited));
             }
+            output.Length -= 2; //Removes final ", "
             return output.ToString();
         }
-
+        /// <summary>
+        /// Private helper method that helps print the packages in dependency order.
+        /// </summary>
+        /// <param name="package">The package who's dependees to print</param>
+        /// <param name="visited">Master set of all visited packages. Stops repeats</param>
+        /// <returns>This package plus all its dependee classes.</returns>
         private String printDependees(String package, HashSet<String> visited)
         {
             visited.Add(package);
 
             var output = new StringBuilder();
+
             HashSet<String> dependees;
             m_dependees.TryGetValue(package, out dependees);
             if (dependees != null)
@@ -103,9 +111,10 @@ namespace PackageInstaller
                 foreach (var packName in dependees)
                 {
                     if(!visited.Contains(packName))
-                        output.Append(", " + printDependees(packName,visited));
+                        output.Append(printDependees(packName,visited));
                 }
             }
+            output.Append(package + ", ");
             return output.ToString();
         }
     }
