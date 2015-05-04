@@ -30,6 +30,26 @@ namespace DependenciesTester
 
         }
         [TestMethod]
+        public void SimpleTest2() //In order linear dependencies
+        {
+            string[] dependencies =
+            {
+                "A: ", "B: A", "C: B", "D: C", "E: D", "F: D"
+            };
+            DependenciesTracker DT;
+            try
+            {
+                DT = new DependenciesTracker(dependencies);
+                String packageDependencies = DT.PrintPackageDependencies();
+                Assert.AreEqual("A, B, C, D, E, F", packageDependencies);
+            }
+            catch (CircularDependencyException)
+            {
+                Assert.Fail("Unexpected CircularDependenciesException occured.");
+            }
+
+        }
+        [TestMethod]
         public void CircularTest1() //Initial circular dependencies test using the example from the PDF.
         {
             string[] dependencies =

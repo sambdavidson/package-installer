@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PackageInstaller
 {
@@ -54,16 +51,23 @@ namespace PackageInstaller
                     dependentDependeesSet.Add(dependee);
                 }
                 
-                CheckCircularDependency(dependent,dependent); //Check circular dependency
+                CheckCircularDependency(dependent); //Check circular dependency
             }
 
         }
-
-        private void CheckCircularDependency(String dependency, String startVal)
+        /// <summary>
+        /// Helper method that recursively explores a package's dependents. 
+        /// If the starting package is found as a dependent 
+        /// </summary>
+        /// <param name="package">The package who's dependent tree to explore.</param>
+        /// <param name="startVal">The starting package which upon finding indicates a circular dependency</param>
+        private void CheckCircularDependency(String package, String startVal = "")
         {
-            
+            if (startVal == "") //Workaround for the variable parameter startVal
+                startVal = package;
+
             HashSet<String> directDependents;
-            m_dependencies.TryGetValue(dependency, out directDependents);
+            m_dependencies.TryGetValue(package, out directDependents);
             if (directDependents != null) //Base case
             {
                 foreach (var str in directDependents) //Recursively check the dependents
