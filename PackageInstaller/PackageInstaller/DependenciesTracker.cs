@@ -8,28 +8,51 @@ namespace PackageInstaller
 {
     public class DependenciesTracker
     {
-        private Dictionary<String, List<String>> m_dependencies;
+        private Dictionary<String, HashSet<String>> m_dependencies;
         public DependenciesTracker(String[] dependencies)
         {
-            m_dependencies = new Dictionary<String, List<String>>();
+            m_dependencies = new Dictionary<String, HashSet<String>>();
+
+            foreach (var line in dependencies)
+            {
+                var parts = line.Split(':');
+                String dependent = parts[0].Trim();
+                if (parts[1].Trim().Length > 0) // Check if the second dependency exists
+                {
+                    String dependee = parts[1].Trim();
+                    HashSet<String> tmpList;
+                    m_dependencies.TryGetValue(dependee, out tmpList);
+                    if (tmpList == null)
+                    {
+                        tmpList = new HashSet<string> {dependent};
+                        m_dependencies.Add(dependee, tmpList);
+                    }
+                    else
+                    {
+                        tmpList.Add(dependent);
+                    }
+                }
+                CheckCircularDependency(dependent,dependent); //Check circular dependency
+            }
 
         }
 
-        private HashSet<String> getDependents(String dependency)
+        private void CheckCircularDependency(String dependency, String startVal)
         {
-            var dependents = new HashSet<String>();
             
-            List<String> directDependents;
+            HashSet<String> directDependents;
             m_dependencies.TryGetValue(dependency, out directDependents);
-            if (directDependents != null)
+            if (directDependents != null) //Base case
             {
-                foreach (var String in directDependents)
+                foreach (var str in directDependents) //Recursively check the dependents
                 {
-                    dependents.Add(String);
-                    dependents.UnionWith(getDependents(String));
+                    if (str == startVal)
+                    {
+                       throw new CircularDependenciesException(); 
+                    }
+                    CheckCircularDependency(str, startVal);
                 }
             }
-            return dependents;
         }
 
         public String PrintDependencies()
